@@ -7,7 +7,7 @@ import { RolesGuard } from './guards/roles.guard';
 import { Roles } from 'src/Decorators/roles.decorator';
 import { CreateUserDto } from '../user/dto/create-user.dto';
 import { Permissions } from 'src/Decorators/permissions.decorator';
-
+import { RolePermissionDto } from './dto/permission.dto';
 
 
 @Controller('auth')
@@ -17,6 +17,12 @@ export class AuthController {
     constructor(private authService: AuthService) {
 
     }
+    //endpoint to inject permissions-roles association...
+    @Post('associate-permission')
+    async associateRoleWithPermission(@Body() rolePermissionDto: RolePermissionDto): Promise<string> {
+        return this.authService.associateRoleWithPermission(rolePermissionDto);
+    }
+
     //login router for auth...
     @Post('login')
     @UseGuards(LocalGuard)
@@ -37,7 +43,7 @@ export class AuthController {
             return res.status(HttpStatus.BAD_REQUEST).json({ message: error.message });
         }
     }
-    @Permissions('view_resource') // Example of using the permissions decorator
+    @Permissions('view_resource') // Example of using the permissions decorator(it is a random one, but the functionality can be tested with it)
     @Get('statusforadmin')
     @Roles('ADMIN')
     @UseGuards(JwtAuthGuard)
@@ -62,7 +68,7 @@ export class AuthController {
         console.log('the request user is:', req.user)
         return req.user;
     }
-    @Permissions('edit_resource') // Example of using the permissions decorator
+    @Permissions('edit_resource')  // Example of using the permissions decorator(it is a random one, but the functionality can be tested with it)
     @Get('statusforguest')
     @Roles('GUEST')
     @UseGuards(JwtAuthGuard)

@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException, ConflictException, InternalServerErrorException } from '@nestjs/common';
+import { Injectable, UnauthorizedException,BadRequestException, ConflictException,NotFoundException, InternalServerErrorException } from '@nestjs/common';
 import { authPayloadDto } from './dto/auth.dto';
 import { CreateUserDto } from '../user/dto/create-user.dto';
 import { JwtService } from '@nestjs/jwt';
@@ -6,11 +6,20 @@ import { UserService } from '../user/user.service'; // Assuming this is the path
 import { User } from 'src/entities/user.entity';
 import * as bcrypt from 'bcrypt';
 import { jwtPayloadDto } from './dto/jwtPayload.dto';
+import { RolePermissionDto } from './dto/permission.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Role } from 'src/entities/roles.entity';
+import { Permission } from 'src/entities/permission.entity';
 @Injectable()
 export class AuthService {
   constructor(
     private readonly userService: UserService,
     private jwtService: JwtService,
+    @InjectRepository(Role)
+    private roleRepository: Repository<Role>,
+    @InjectRepository(Permission)
+    private permissionRepository: Repository<Permission>,
   ) { }
 
 private async generateJwtToken(user: User): Promise<string> {
@@ -61,5 +70,40 @@ private async generateJwtToken(user: User): Promise<string> {
       }
 
     }
+  }
+
+
+  //function to associate permissions with roles...
+  async associateRoleWithPermission(rolePermissionDto: RolePermissionDto): Promise<string> {
+    const { role, permission } = rolePermissionDto;
+
+    // Check if role exists
+    const roleEntity = await this.roleRepository.findOne({ where: { name: role }, relations: ['permissions'] });
+    if (!roleEntity) {
+      throw new NotFoundException(`Role ${role} not found`);
+    }
+
+    // Check if permission exists
+    const permissionEntity = await this.permissionRepository.findOne({ where: { name: permission } });
+    if (!permissionEntity) {
+      throw new NotFoundException(`Permission ${permission} not found`);
+    }
+
+    // Check if the permission is already associated with the role
+    const isPermissionAlreadyAssociated = roleEntity.permissions.some(
+      (perm) => perm.name === permission
+    );
+    if (isPermissionAlreadyAssociated) {
+      throw new BadRequestException(`Permission ${permission} is already associated with Role ${role}`);
+    }
+
+    // Associate permission with role
+    if (!roleEntity.permissions) {
+      roleEntity.permissions = [];
+    }
+    roleEntity.permissions.push(permissionEntity);
+    await this.roleRepository.save(roleEntity);
+
+    return `Permission ${permission} has been associated with Role ${role}`;
   }
 }
