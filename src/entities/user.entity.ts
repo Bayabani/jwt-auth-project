@@ -8,6 +8,9 @@ export class User {
   @Column({ unique: true }) // Ensure the username is unique
   username: string;
 
+    @Column({ unique: true })
+    email: string;
+
   @Column()
   password: string;
   

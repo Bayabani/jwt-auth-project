@@ -13,7 +13,7 @@ import { PermissionRepository } from 'src/Repository/permissions.repository';
 import { RoleRepository } from 'src/Repository/roles.repository';
 import { Permission } from 'src/entities/permission.entity';
 import { Role } from 'src/entities/roles.entity';
-
+import { GoogleStrategy } from './strategies/google.strategy';
 @Module({
   imports: [PassportModule,
     JwtModule.register({
@@ -22,6 +22,6 @@ import { Role } from 'src/entities/roles.entity';
     }), TypeOrmModule.forFeature([User, Role, Permission]),
   ],
   controllers: [AuthController],
-  providers: [AuthService, LocalStrategy, JwtStrategy, UserService, UserRepository,PermissionRepository, RoleRepository ]
+  providers: [AuthService, LocalStrategy, JwtStrategy, UserService, UserRepository,PermissionRepository, RoleRepository, GoogleStrategy ]
 })
 export class AuthModule { }

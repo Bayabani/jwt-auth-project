@@ -28,7 +28,10 @@ export class UserService {
   }
 
   async getUserById(id: number, options?: any): Promise<User> {
-    return this.userRepository.getuserbyId({ where: { id }, ...options });
+    return this.userRepository.getuserbyId(id);
   }
+      async findByEmail(email: string): Promise<User | undefined> {
+        return await this.userRepository.findOne({ where: { email },relations: ['roles']});
+    }
 
 }

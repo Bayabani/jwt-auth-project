@@ -17,7 +17,7 @@ export class UserRepository extends Repository<User> {
 
   async createuser(createUserDto: CreateUserDto): Promise<User> {
     console.log('inside createUser in user repository...', createUserDto);
-    const { username, password, roles } = createUserDto;
+    const { username, password, roles, email } = createUserDto;
     const hashedPassword = await bcrypt.hash(password, 10);
     try {
       // Fetch the corresponding Role entities from the database
@@ -29,7 +29,7 @@ export class UserRepository extends Repository<User> {
         throw new InternalServerErrorException('Some roles do not exist');
       }
 
-      const newUser = this.create({ username, password: hashedPassword, roles: roleEntities });
+      const newUser = this.create({ username, password: hashedPassword, roles: roleEntities, email });
       const savedUser = await this.save(newUser);
 
       return savedUser;
@@ -58,6 +58,7 @@ export class UserRepository extends Repository<User> {
   async getuserbyId(id: number): Promise<User | undefined> {
     try {
       console.log('inside getUserById function');
+      console.log('id given to getuserbyId', id)
       return await this.findOne({
         where: { id },
         relations: ['roles'], // Ensure roles are fetched

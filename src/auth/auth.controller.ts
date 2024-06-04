@@ -7,7 +7,12 @@ import { RolesGuard } from './guards/roles.guard';
 import { Roles } from 'src/Decorators/roles.decorator';
 import { CreateUserDto } from '../user/dto/create-user.dto';
 import { Permissions } from 'src/Decorators/permissions.decorator';
-import { RolePermissionDto } from './dto/permission.dto';
+import { RolePermissionDto } from './dto/permission.dto'; 
+import { CreateRoleDto } from './dto/createRole.dto';
+import { CreatePermissionDto } from './dto/createPermission.dto';
+import { Role } from 'src/entities/roles.entity';
+import { Permission } from 'src/entities/permission.entity';
+import { GoogleAuthGuard } from './guards/oauth.guard';
 
 
 @Controller('auth')
@@ -15,7 +20,15 @@ import { RolePermissionDto } from './dto/permission.dto';
 export class AuthController {
 
     constructor(private authService: AuthService) {
+    }
+    @Post('create-role')
+    async createRole(@Body() createRoleDto: CreateRoleDto): Promise<Role> {
+        return await this.authService.createRole(createRoleDto);
+    }
 
+    @Post('create-permission')
+    async createPermission(@Body() createPermissionDto: CreatePermissionDto): Promise<Permission> {
+        return await this.authService.createPermission(createPermissionDto);
     }
     //endpoint to inject permissions-roles association...
     @Post('associate-permission')
@@ -30,8 +43,22 @@ export class AuthController {
         return req.user;
     }
 
+        //login router for auth...
+    @Get('oauth-login')
+    @UseGuards(GoogleAuthGuard)
+    oauth_login(@Req() req: Request) {
+        return req.user;
+    }
+
+    
+
+    @Get('oauth')
+    @UseGuards(GoogleAuthGuard)
+    oauth(@Req() req: Request) {
+        return req.user;
+    }
+
     @Post('signup')
-    //@Roles('EMPLOYER', 'ADMIN', 'EMPLOYEE', 'GUEST')
     async signUp(@Body() createUserDto: CreateUserDto, @Res() res) {
         try {
             console.log('inside signup...', createUserDto)

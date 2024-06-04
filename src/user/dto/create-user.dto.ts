@@ -1,4 +1,4 @@
-import { IsString, IsNotEmpty, MinLength, ArrayMinSize, ArrayMaxSize, ArrayUnique, IsArray, IsEnum } from 'class-validator';
+import { IsString, IsNotEmpty, MinLength, ArrayMinSize, ArrayMaxSize, ArrayUnique, IsArray, IsEnum, IsEmail } from 'class-validator';
 import { UserRole } from 'src/enum/roles.enum';
 
 export class CreateUserDto {
@@ -10,6 +10,11 @@ export class CreateUserDto {
   @IsNotEmpty()
   @MinLength(6)
   password: string;
+
+  @IsEmail()
+  @IsNotEmpty()
+  email: string;
+
 
   @IsArray({ message: 'Roles must be an array' })
   @ArrayMinSize(1, { message: 'At least one role must be provided' })
